@@ -65,7 +65,7 @@ def main(argv : list):
     if len(argv) < 2:
         raise RuntimeError("You need to provide this script with image. (try python %s -h)"
         % argv[0].split('/')[-1])
-    if not os.path.exists(argv[-1]) and os.path.isfile(argv[-1]):
+    if not os.path.exists(argv[-1]) or not os.path.isfile(argv[-1]):
         raise FileNotFoundError("No such file: %s" % argv[-1])
 
     # Operations with image
