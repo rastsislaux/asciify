@@ -1,6 +1,8 @@
 ## asciify
 A little script to turn any image into ASCII-art
 
+Note: before using you need to install requirements (```pip install requirements.txt```)
+
 Usage: python asciify.py [options] path_to_image<br>
 Options:<br>
 &emsp;-h, --help						&emsp;&emsp;&emsp;&ensp;Displays this message<br>
