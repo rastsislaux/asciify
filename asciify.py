@@ -5,7 +5,6 @@ import sys
 import os
 
 # Imports for the converter itself
-import textwrap
 from math import floor
 from PIL import Image
 
@@ -16,21 +15,21 @@ def byte_to_ascii(byte : int, spaces = False):
     byte is a byte you want to convert\n
     spaces is whether you want to allow using spaces in new ASCII-file"""
 
-    asciis = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'."
+    asciis = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'."
     if spaces:
         asciis += ' '
-    return asciis[floor(byte/255 * len(asciis))-1]
+    return asciis[floor(byte/255 * len(asciis)-1)]
 
-def ascii_to_byte(ascii : chr, spaces = False):
+def ascii_to_byte(char : chr, spaces = False):
 
     """Convert char to according brightness byte\n
     ascii is a char you want to convert\n
     spaces is whether spaces are in the ASCII picture"""
 
-    asciis = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,\"^`'."
+    asciis = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'."
     if spaces:
         asciis += ' '
-    return (floor(asciis.index(ascii)/len(asciis) * 255)).to_bytes(1, "big")
+    return (floor(asciis.index(char)/len(asciis) * 255)).to_bytes(1, "big")
 
 def asciify(image : bytes, width : int, coefficient = 1, spaces = False):
 
@@ -40,9 +39,12 @@ def asciify(image : bytes, width : int, coefficient = 1, spaces = False):
     coefficient is needed to widen your output (because symbols are high and slim)"""
 
     result = ""
-    for byte in image:
+    for i, byte in enumerate(image):
         result += byte_to_ascii(byte, spaces)*coefficient
-    return '\n'.join(textwrap.wrap(result, width=width*coefficient))
+        if (i+1) % width == 0:
+            result += '\n'
+
+    return result
 
 def deasciify(image : str, coefficent = 1, spaces = False):
 
@@ -54,7 +56,7 @@ def deasciify(image : str, coefficent = 1, spaces = False):
     result = bytes()
     image = image.replace('\n', '')
     for i, char in enumerate(image):
-        if not (i % coefficent):
+        if not i % coefficent:
             result += ascii_to_byte(char, spaces)
     return result
 
@@ -68,7 +70,7 @@ def print_help(filename):
     print("Convert your image to ASCII art")
     print("\nOptions:")
     print("\t-h, --help\t\t\tDisplays this message")
-    print("\t-d, --deasciify <path>\t\tTakes text file with ASCII art from path_to_image and turns it into png")
+    print("\t-d, --deasciify <path>\t\tConvert ASCII art from path_to_image into regular image")
     print("\t-r, --resolution <WIDTHxHEIGHT>\tSets resolution to result")
     print("\t-s, --spaces\t\t\tAllows to use spaces")
     print("\t-c, --coefficient <coefficient>\tSets the propotion coefficient")
@@ -128,7 +130,7 @@ def main(argv : list):
     else:
         with open(argv[-1], 'r', encoding="utf-8") as ascii_art:
             ascii_content = ascii_art.read()
-            
+
         # If not provided manually, set resolution to original's resolution
         if not resolution:
             resolution = (
